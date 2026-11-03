@@ -1,5 +1,3 @@
-import java.util.concurrent.Semaphore;
-
 public class Doctor extends Thread{
 int doctorID;
 WaitingRoom waitingroom;
@@ -23,14 +21,14 @@ Semaphore treatmentRooms;
     public void run() {
         try {
             while (true) {
-                // Patient patient = waitingroom.getPatient();
-                treatmentRooms.acquire();
+                  Patient patient = waitingroom.consume();
+                treatmentRooms.P();
                 try {
-                    // System.out.println(getDoctorName() + " is treating " + patient.patientID);
+                    System.out.println(getDoctorName() + " is treating " + patient.getPatientName());
                     Thread.sleep(2000);
-                    // System.out.println(getDoctorName() + " has finished treating " + patient.patientID);
+                    System.out.println(getDoctorName() + " has finished treating " + patient.getPatientName());
                 } finally {
-                    treatmentRooms.release();
+                    treatmentRooms.V();
                 }
             }
         } catch (InterruptedException e) {
