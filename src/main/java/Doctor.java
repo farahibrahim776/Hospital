@@ -31,14 +31,22 @@ Semaphore treatmentRooms;
 
                 System.out.println(getDoctorName() + " is assigned to " + patient.getPatientName());
 
-                treatmentRooms.P();
-                try {
-                    System.out.println(getDoctorName() + " entered a treatment room with " + patient.getPatientName());
-                    System.out.println(getDoctorName() + " is treating " + patient.getPatientName());
-                    Thread.sleep(2000);
-                    System.out.println(getDoctorName() + " has finished treating " + patient.getPatientName());
-                } finally {
-                    treatmentRooms.V();
+                boolean acquired = treatmentRooms.tryAcquire(3000);
+                if (acquired) {
+                    try {
+                        System.out.println(getDoctorName() + " entered a treatment room");
+
+                        System.out.println(getDoctorName() + " is treating " + patient.getPatientName());
+
+                        Thread.sleep(2000);
+
+                        System.out.println(getDoctorName() + " has finished treating " + patient.getPatientName());
+
+                    } finally {
+                        treatmentRooms.V();
+                    }
+                } else {
+                    System.out.println(getDoctorName() + " couldn't get a treatment room");
                 }
             }
         } catch (InterruptedException e) {
