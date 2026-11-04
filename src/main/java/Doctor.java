@@ -21,9 +21,19 @@ Semaphore treatmentRooms;
     public void run() {
         try {
             while (true) {
-                  Patient patient = waitingroom.consume();
+                System.out.println(getDoctorName() + " is idle, waiting for patients"); // =>>>
+                Patient patient = waitingroom.consume();
+
+                if (patient == null) {
+                    System.out.println(getDoctorName() + " is leaving");
+                    break;
+                }
+
+                System.out.println(getDoctorName() + " is assigned to " + patient.getPatientName());
+
                 treatmentRooms.P();
                 try {
+                    System.out.println(getDoctorName() + " entered a treatment room with " + patient.getPatientName());
                     System.out.println(getDoctorName() + " is treating " + patient.getPatientName());
                     Thread.sleep(2000);
                     System.out.println(getDoctorName() + " has finished treating " + patient.getPatientName());
