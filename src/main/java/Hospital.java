@@ -2,14 +2,31 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 public class Hospital {
-    public static void main(String[] args){
+
+    private static int treatedPatients = 0;
+    public static void patientTreated() {
+        synchronized (Hospital.class) {
+            treatedPatients++;
+            Hospital.class.notifyAll();
+        }
+    }
+
+    private static void waitForAllPatients(int total) throws InterruptedException {
+        synchronized (Hospital.class) {
+            while (treatedPatients < total) {
+                Hospital.class.wait();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
         // getting inputs
         int capacity, doctors, patients;
         Scanner input = new Scanner(System.in);
 
         System.out.print("Waiting Room Capacity: ");
         capacity = input.nextInt();
-        
+
         System.out.print("Number of Doctors: ");
         doctors = input.nextInt();
 
@@ -36,44 +53,50 @@ public class Hospital {
         ArrayList<Patient> patientList = new ArrayList();
 
         // creating doctor & patients
-        for (int i = 0; i < doctors; i++) {
+        for (int i = 1; i <= doctors; i++) {
             Doctor doctor = new Doctor(i, waitingRoom, treatmentRoom);
             doctorList.add(doctor);
         }
-        for (int i = 0; i < patients; i++) {
+        for (int i = 1; i <= patients; i++) {
             Patient patient = new Patient(i, waitingRoom);
             patientList.add(patient);
         }
 
-
         // -------------------- start of simulation --------------------
+
         System.out.println("\nPatients arriving:");
-        for(int i = 0; i < patients ; i++){
-            System.out.print("P"+ (i+1) + " ");
+        for (int i = 1; i <= patients; i++) {
+            System.out.print("P" + i + " ");
         }
         System.out.print("\n\n");
 
-        for(Doctor doctor : doctorList){
+        for (Doctor doctor : doctorList) {
             doctor.start();
         }
-        for(Patient patient : patientList){
+        for (Patient patient : patientList) {
             patient.start();
         }
 
-        try{
-            for(Patient patient : patientList){
+        try {
+            for (Patient patient : patientList) {
                 patient.join();
             }
-            for(Doctor doctor : doctorList){
+            waitForAllPatients(patients);
+
+            // termination sigmal for doctors
+            for (int i = 0; i < doctors; i++) {
+                waitingRoom.produce(new Patient(-1, waitingRoom));
+            }
+
+            for (Doctor doctor : doctorList) {
                 doctor.join();
             }
+
             System.out.println("All patients have been treated.");
             System.out.println("Simulation completed.");
-        }
-        catch(InterruptedException e){
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-
         input.close();
     }
 }

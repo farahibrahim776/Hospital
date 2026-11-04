@@ -1,3 +1,5 @@
+import java.util.concurrent.ThreadLocalRandom;
+
 public class Doctor extends Thread{
 int doctorID;
 WaitingRoom waitingroom;
@@ -21,32 +23,48 @@ Semaphore treatmentRooms;
     public void run() {
         try {
             while (true) {
-                System.out.println(getDoctorName() + " is idle, waiting for patients"); // =>>>
                 Patient patient = waitingroom.consume();
 
-                if (patient == null) {
-                    System.out.println(getDoctorName() + " is leaving");
+                // if (patient == null) {
+                //     // System.out.println(getDoctorName() + " is leaving");
+                //     break;
+                // }
+
+                if (patient.getPatientId() == -1) {
+                    waitingroom.releaseSeat();
                     break;
                 }
 
-                System.out.println(getDoctorName() + " is assigned to " + patient.getPatientName());
+                System.out.println(getDoctorName() + " is assigned to " + patient.getPatientName() + "\n");
+                waitingroom.releaseSeat();
+                System.out.println(getDoctorName() + " is trying to acquire a treatment room.\n");
 
                 boolean acquired = treatmentRooms.tryAcquire(3000);
                 if (acquired) {
                     try {
-                        System.out.println(getDoctorName() + " entered a treatment room");
+                        System.out.println(getDoctorName() + " acquired a treatment room.");
+                        System.out.println(getDoctorName() + " begins treating " + patient.getPatientName() + ".\n");
 
-                        System.out.println(getDoctorName() + " is treating " + patient.getPatientName());
+                        // random treatment time
+                        int treatmentTime =ThreadLocalRandom.current().nextInt(1000, 5001);
+                        Thread.sleep(treatmentTime);
 
-                        Thread.sleep(2000);
-
-                        System.out.println(getDoctorName() + " has finished treating " + patient.getPatientName());
-
+                        System.out.println(getDoctorName() + " finished treating " + patient.getPatientName() + ".");
+                        
+                        System.out.println(getDoctorName() + " released the treatment room.");
+                        System.out.println(getDoctorName() + " is now available.\n");
+                        System.out.println(patient.getPatientName() + " left.");
+                        Hospital.patientTreated();
+                        
                     } finally {
                         treatmentRooms.V();
                     }
+
                 } else {
-                    System.out.println(getDoctorName() + " couldn't get a treatment room");
+                    System.out.println("Doctor " + doctorID + " could not acquire a treatment room.\n");
+                    System.out.println(getDoctorName() + " is sending " + patient.getPatientName() + " back to the waiting room.");
+
+                    // patient goes back into the bounded buffer.
                     waitingroom.produce(patient);
                 }
             }

@@ -1,41 +1,87 @@
 public class WaitingRoom {
     private int size;
-    private int inptr=0;
-    private int outptr=0;
+    private int inptr = 0;
+    private int outptr = 0;
     private Patient store[];
     Semaphore spaces;
     Semaphore elements;
-    WaitingRoom(int size){
-        this.size=size;
-        store =new Patient[size];
-        spaces=new Semaphore(size);
-        elements=new Semaphore(0);
+
+    WaitingRoom(int size) {
+        this.size = size;
+        store = new Patient[size];
+        spaces = new Semaphore(size);
+        elements = new Semaphore(0);
     }
-    public  void addPatient(Patient value){
-        synchronized (this){
-        store[inptr]=value;
-        inptr=(inptr+1)%size;
+
+    public void addPatient(Patient value) {
+        synchronized (this) {
+            store[inptr] = value;
+            inptr = (inptr + 1) % size;
         }
     }
-    public  Patient removePatient(){
+
+    public Patient removePatient() {
         Patient value;
-        synchronized(this){
-        value= store[outptr];
-        outptr=(outptr+1)%size;
+        synchronized (this) {
+            value = store[outptr];
+            store[outptr] = null;
+            outptr = (outptr + 1) % size;
         }
         return value;
 
     }
+
     public void produce(Patient value) {
-        spaces.P();
+        // spaces.P();
+        // addPatient(value);
+        // elements.V();
+
+        boolean normalPatient = value.getPatientId() != -1;
+
+        synchronized (this) {
+        // acquire an available seat.
+        if (spaces.tryAcquire(0)) {
+            addPatient(value);
+            if (normalPatient) {
+                synchronized (System.out) {
+                    System.out.println(value.getPatientName()+ " entered the waiting room.\n");
+                }
+            }
+            elements.V();
+            return;
+        }
+
+        // No available seat.
+        if (normalPatient) {
+            synchronized (System.out) {
+                System.out.println("The waiting room is full.");
+                System.out.println(value.getPatientName()+ " is waiting outside for an available seat.\n");
+            }
+        }
+    }
+
+    // wait outsid etill seat is available
+    spaces.P();
+    synchronized (this) {
         addPatient(value);
+        if (normalPatient) {
+            synchronized (System.out) {
+                System.out.println(value.getPatientName()+ " entered the waiting room.\n");
+            }
+        }
         elements.V();
     }
+}
 
-    public Patient consume(){
+    public Patient consume() {
+        // Patient value = removePatient();
+        // spaces.V();
+        // return value;
         elements.P();
-        Patient value=removePatient();
+        return removePatient();
+    }
+
+    public void releaseSeat(){
         spaces.V();
-        return value;
     }
 }
