@@ -47,6 +47,7 @@ Semaphore treatmentRooms;
                     }
                 } else {
                     System.out.println(getDoctorName() + " couldn't get a treatment room");
+                    waitingroom.produce(patient);
                 }
             }
         } catch (InterruptedException e) {
