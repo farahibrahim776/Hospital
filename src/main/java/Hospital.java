@@ -1,7 +1,3 @@
-// waiting room: needs a constructor with capacity 
-// doctor : needs a constructor with id, wait room, treatment room
-
-
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -34,27 +30,28 @@ public class Hospital {
             patients = input.nextInt();
         }
 
-        // WaitingRoom waitingRoom = new WaitingRoom(capacity);
+        WaitingRoom waitingRoom = new WaitingRoom(capacity);
         Semaphore treatmentRoom = new Semaphore(2);
         ArrayList<Doctor> doctorList = new ArrayList();
         ArrayList<Patient> patientList = new ArrayList();
 
         // creating doctor & patients
         for (int i = 0; i < doctors; i++) {
-            // Doctor doctor = new Doctor(i, waitingRoom, treatmentRoom);
-            // doctorList.add(doctor);
+            Doctor doctor = new Doctor(i, waitingRoom, treatmentRoom);
+            doctorList.add(doctor);
         }
         for (int i = 0; i < patients; i++) {
-            // Patient patient = new Patient(i, waitingRoom);
-            // patientList.add(patient);
+            Patient patient = new Patient(i, waitingRoom);
+            patientList.add(patient);
         }
 
 
         // -------------------- start of simulation --------------------
-        System.out.println("Patients arriving:");
+        System.out.println("\nPatients arriving:");
         for(int i = 0; i < patients ; i++){
-            System.out.println("P"+ i+1 + " ");
+            System.out.print("P"+ (i+1) + " ");
         }
+        System.out.print("\n\n");
 
         for(Doctor doctor : doctorList){
             doctor.start();
@@ -76,5 +73,7 @@ public class Hospital {
         catch(InterruptedException e){
             Thread.currentThread().interrupt();
         }
+
+        input.close();
     }
 }
