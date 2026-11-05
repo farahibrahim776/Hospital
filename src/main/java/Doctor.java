@@ -24,12 +24,6 @@ Semaphore treatmentRooms;
         try {
             while (true) {
                 Patient patient = waitingroom.consume();
-
-                // if (patient == null) {
-                //     // System.out.println(getDoctorName() + " is leaving");
-                //     break;
-                // }
-
                 if (patient.getPatientId() == -1) {
                     waitingroom.releaseSeat();
                     break;
@@ -63,8 +57,6 @@ Semaphore treatmentRooms;
                 } else {
                     System.out.println("Doctor " + doctorID + " could not acquire a treatment room.\n");
                     System.out.println(getDoctorName() + " is sending " + patient.getPatientName() + " back to the waiting room.");
-
-                    // patient goes back into the bounded buffer.
                     waitingroom.produce(patient);
                 }
             }

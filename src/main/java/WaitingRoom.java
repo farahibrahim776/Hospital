@@ -28,18 +28,11 @@ public class WaitingRoom {
             outptr = (outptr + 1) % size;
         }
         return value;
-
     }
 
     public void produce(Patient value) {
-        // spaces.P();
-        // addPatient(value);
-        // elements.V();
-
         boolean normalPatient = value.getPatientId() != -1;
-
         synchronized (this) {
-        // acquire an available seat.
         if (spaces.tryAcquire(0)) {
             addPatient(value);
             if (normalPatient) {
@@ -51,7 +44,6 @@ public class WaitingRoom {
             return;
         }
 
-        // No available seat.
         if (normalPatient) {
             synchronized (System.out) {
                 System.out.println("The waiting room is full.");
@@ -60,7 +52,6 @@ public class WaitingRoom {
         }
     }
 
-    // wait outsid etill seat is available
     spaces.P();
     synchronized (this) {
         addPatient(value);
@@ -74,9 +65,6 @@ public class WaitingRoom {
 }
 
     public Patient consume() {
-        // Patient value = removePatient();
-        // spaces.V();
-        // return value;
         elements.P();
         return removePatient();
     }

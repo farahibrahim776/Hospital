@@ -20,7 +20,6 @@ public class Hospital {
     }
 
     public static void main(String[] args) {
-        // getting inputs
         int capacity, doctors, patients;
         Scanner input = new Scanner(System.in);
 
@@ -33,7 +32,6 @@ public class Hospital {
         System.out.print("Number of Patients: ");
         patients = input.nextInt();
 
-        // edge case handle
         while (capacity <= 0 || doctors <= 0 || patients <= 0) {
             System.out.println("Invalid input!");
 
@@ -52,7 +50,6 @@ public class Hospital {
         ArrayList<Doctor> doctorList = new ArrayList();
         ArrayList<Patient> patientList = new ArrayList();
 
-        // creating doctor & patients
         for (int i = 1; i <= doctors; i++) {
             Doctor doctor = new Doctor(i, waitingRoom, treatmentRoom);
             doctorList.add(doctor);
@@ -83,7 +80,6 @@ public class Hospital {
             }
             waitForAllPatients(patients);
 
-            // termination sigmal for doctors
             for (int i = 0; i < doctors; i++) {
                 waitingRoom.produce(new Patient(-1, waitingRoom));
             }
